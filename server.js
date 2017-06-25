@@ -9,7 +9,7 @@ var searchTerm = require('./models/searchTerm');
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use(express.static(__dirname));
+// app.use(express.static(__dirname));
 
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/searchTerms');
@@ -21,26 +21,22 @@ app.get('/api/imagesearch/:searchVal*', (req, res, next)=>{
     searchVal,
     searchDate: new Date()
   });
-  // console.log(offset)
   data.save(err=>{
     if(err){
       res.send('Error Saving to Database');
     }
-    // res.json(data);
   });
-  // return res.json({
-  //   searchVal,
-  //   offset
-  // });
+
   var searchOffset
-  if(offset){
-    if(offset == 1){
+    if(offset === undefined || offset == null || offset.length <= 0){
       offset = 0;
       searchOffset = 1;
-    } else if (offset > 1){
+    } else if (offset >= 1){
       searchOffset = offset + 1;
+    } else {
+      searchOffset = 1;
     }
-  }
+  console.log(offset);
   Bing.images(searchVal, {
     top: (10 * searchOffset),
     skip: (10 * offset)
@@ -57,6 +53,7 @@ app.get('/api/imagesearch/:searchVal*', (req, res, next)=>{
       })
     }
     return res.json(bingData);
+    // console.log(body)
   })
 })
 
